@@ -1,95 +1,121 @@
 # Dataset Wilayah Administratif Indonesia
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![API Status](https://img.shields.io/badge/api-live-green)](https://api.ibnuhabib.web.id/api/wilayah/provinces)
-[![Records](https://img.shields.io/badge/records-88.297-orange)](#data)
+[![Sumber: Kepmendagri 2025](https://img.shields.io/badge/sumber-Kepmendagri%202025-blue)](https://github.com/cahyadsn/wilayah)
+[![Records](https://img.shields.io/badge/records-91.599-orange)](#data)
 
-Data wilayah administratif Indonesia: provinsi, kabupaten/kota, kecamatan, dan desa/kelurahan. Bersumber dari data Kemendagri.
+Data wilayah administratif Indonesia lengkap, **38 provinsi** (termasuk pemekaran Papua), dengan hierarki provinsi, kabupaten/kota, kecamatan, dan desa/kelurahan. Rujukan: **Kepmendagri No. 300.2.2-2138 Tahun 2025**.
+
+Versi sebelumnya (34 provinsi) tetap disimpan di `legacy-34-provinsi/` untuk keperluan arsip.
 
 ## Data
 
-| File | Records | Size | Kolom |
-|------|---------|------|-------|
-| `provinces.csv` | 34 | 551 B | `id, name` |
-| `regencies.csv` | 514 | 14 KB | `id, province_id, name` |
-| `districts.csv` | 7.215 | 166 KB | `id, regency_id, name` |
-| `villages.csv` | 80.534 | 2.3 MB | `id, district_id, name` |
+Ada dua bentuk data di repo ini:
 
-**Delimiter:** koma (`,`)  
-**Tanpa header** — data langsung dari baris pertama.
+### 1. Sumber asli (SQL)
 
-## Hubungan Antar Data
+| File | Baris | Ukuran | Keterangan |
+|------|-------|--------|------------|
+| `wilayah-kemendagri-2025.sql` | 91.599 | 2,8 MB | Dump resmi dari [cahyadsn/wilayah](https://github.com/cahyadsn/wilayah), kode bertitik (`11.01.01.2001`) |
+
+### 2. Versi bersih (CSV, direkomendasikan dipakai)
+
+Hasil normalisasi dari sumber SQL: kode tanpa titik, id siap pakai untuk database dan API.
+
+| File | Baris | Ukuran | Kolom |
+|------|-------|--------|-------|
+| `clean/provinces.csv` | 38 | 740 B | `id, name` |
+| `clean/regencies.csv` | 514 | 15 KB | `id, province_id, name` |
+| `clean/districts.csv` | 7.285 | 179 KB | `id, regency_id, name` |
+| `clean/villages.csv` | 83.762 | 2,6 MB | `id, district_id, name` |
+
+Aturan normalisasi (dipakai juga oleh platform SNBTKU saat impor):
+- Kode bertitik dibuang: `11.01.01.2001` menjadi `1101012001`.
+- Nama dirapikan spasinya; duplikat id dan baris tanpa induk dibuang (pada sumber 2025 tidak ada).
+- Delimiter koma, ada header, encoding UTF-8.
+
+## Angka kode
+
+| Level | Panjang id | Contoh |
+|-------|-----------|--------|
+| Provinsi | 2 | `11` (Aceh), `32` (Jawa Barat), `93` (Papua Selatan) |
+| Kabupaten/kota | 4 | `3204` (Kabupaten Bandung), `3273` (Kota Bandung) |
+| Kecamatan | 6 | `320409` |
+| Desa/kelurahan | 10 | `3204092001` |
+
+Catatan penting: skema id ini mengikuti Kepmendagri 2025, sehingga **berbeda** dari file lama di `legacy-34-provinsi/` (kecamatan lama 7 digit, desa lama berbasis kode BPS). Empat digit terakhir desa memuat kode tipe (kelurahan/desa) sesuai sumber.
+
+## Hubungan antar data
 
 ```
-province.id ──< regencies.province_id
-regency.id  ──< districts.regency_id
-district.id ──< villages.district_id
+provinces.id  <── regencies.province_id
+regencies.id  <── districts.regency_id
+districts.id  <── villages.district_id
 ```
 
-## Contoh Data
+## Contoh data
 
-**provinces.csv:**
 ```csv
-11,ACEH
-12,SUMATERA UTARA
+# clean/provinces.csv
+id,name
+11,Aceh
+32,Jawa Barat
+93,Papua Selatan
 ```
 
-**regencies.csv:**
 ```csv
-1101,11,KABUPATEN SIMEULUE
-1102,11,KABUPATEN ACEH SINGKIL
+# clean/regencies.csv
+id,province_id,name
+3204,32,Kabupaten Bandung
+3273,32,Kota Bandung
+9301,93,Kabupaten Merauke
 ```
 
-**districts.csv:**
-```csv
-1101010,1101,SIMEULUE TIMUR
-1101020,1101,TEUPAH SELATAN
-```
+## Cara pakai
 
-**villages.csv:**
-```csv
-1101012001,1101010,AIR DINGIN
-1101012002,1101010,AMAITENG MULYA
-```
-
-## API
-
-Gunakan [api-datasets-indonesia](https://github.com/prodhokter/api-datasets-indonesia) untuk akses REST API.
-
-**Base URL:** `https://api.ibnuhabib.web.id`
+### 1. Unduh langsung
 
 ```bash
-# Semua provinsi
-curl "https://api.ibnuhabib.web.id/api/wilayah/provinces"
-
-# Kabupaten/kota di Aceh (id=11)
-curl "https://api.ibnuhabib.web.id/api/wilayah/regencies/11"
-
-# Kecamatan di Kab. Simeulue (id=1101)
-curl "https://api.ibnuhabib.web.id/api/wilayah/districts/1101"
-
-# Desa/kelurahan di kecamatan tertentu
-curl "https://api.ibnuhabib.web.id/api/wilayah/villages/1101010"
-
-# Download CSV
-curl -O "https://api.ibnuhabib.web.id/download/wilayah/provinces.csv"
-curl -O "https://api.ibnuhabib.web.id/download/wilayah/regencies.csv"
-curl -O "https://api.ibnuhabib.web.id/download/wilayah/districts.csv"
-curl -O "https://api.ibnuhabib.web.id/download/wilayah/villages.csv"
+curl -O https://raw.githubusercontent.com/prodhokter/dataset-wilayah-indonesia/master/clean/provinces.csv
 ```
 
-## Dataset Terkait
+### 2. Lewat API publik (data sudah terimpor di Postgres)
 
-- [api-datasets-indonesia](https://github.com/prodhokter/api-datasets-indonesia) — REST API
-- [dataset-sekolah-indonesia](https://github.com/prodhokter/dataset-sekolah-indonesia)
-- [dataset-perguruan-tinggi-indonesia](https://github.com/prodhokter/dataset-perguruan-tinggi-indonesia)
-- [dataset-program-studi-indonesia](https://github.com/prodhokter/dataset-program-studi-indonesia)
-- [dataset-kbbi-indonesia](https://github.com/prodhokter/dataset-kbbi-indonesia)
+Base URL: `https://datasets.snbtku.com` (hostname kedua: `https://api.ibnuhabib.web.id`)
 
-## Sumber
+```bash
+# Semua provinsi (38)
+curl "https://datasets.snbtku.com/api/v1/wilayah/provinces"
 
-Fork dari [emsifa/api-wilayah-indonesia](https://github.com/emsifa/api-wilayah-indonesia) — data Kemendagri.
+# Kabupaten/kota di Jawa Barat (id 32)
+curl "https://datasets.snbtku.com/api/v1/wilayah/regencies?province_id=32"
 
-## Lisensi
+# Kecamatan di Kabupaten Bandung (id 3204)
+curl "https://datasets.snbtku.com/api/v1/wilayah/districts?regency_id=3204"
 
-MIT — sesuai lisensi repository asli.
+# Desa/kelurahan dalam satu kecamatan
+curl "https://datasets.snbtku.com/api/v1/wilayah/villages?district_id=320409"
+```
+
+Contoh respons nyata (`/api/v1/wilayah/regencies?province_id=32`, dipotong):
+
+```json
+{
+  "items": [
+    { "id": "3204", "province_id": "32", "name": "Kabupaten Bandung" },
+    { "id": "3217", "province_id": "32", "name": "Kabupaten Bandung Barat" }
+  ]
+}
+```
+
+Rate limit 120 permintaan per menit per IP, CORS terbuka, respons di-cache 5 menit.
+
+## Sumber & lisensi
+
+- Sumber data: [cahyadsn/wilayah](https://github.com/cahyadsn/wilayah), rujukan Kepmendagri No. 300.2.2-2138/2025, lisensi **MIT, Copyright (c) 2017-2025 Cahya DSN** (teks lisensi lengkap ada di `LICENSE-WILAYAH-UPSTREAM.txt`).
+- Repo ini: MIT, Copyright (c) 2025 Ibnul Habib. File di `clean/` adalah karya turunan dari sumber di atas.
+- Sumber lama (sebelum pemekaran Papua) berasal dari data Kemendagri yang saat itu tersedia.
+
+## Changelog
+
+Lihat [CHANGELOG.md](CHANGELOG.md).
