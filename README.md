@@ -81,20 +81,20 @@ curl -O https://raw.githubusercontent.com/prodhokter/dataset-wilayah-indonesia/m
 
 ### 2. Lewat API publik (data sudah terimpor di Postgres)
 
-Base URL: `https://datasets.snbtku.com` (hostname kedua: `https://api.ibnuhabib.web.id`)
+Base URL publik: `https://api.ibnuhabib.web.id`. Hostname internal untuk aplikasi SNBTKU (layanan sama): `https://datasets.snbtku.com`.
 
 ```bash
 # Semua provinsi (38)
-curl "https://datasets.snbtku.com/api/v1/wilayah/provinces"
+curl "https://api.ibnuhabib.web.id/api/v1/wilayah/provinces"
 
 # Kabupaten/kota di Jawa Barat (id 32)
-curl "https://datasets.snbtku.com/api/v1/wilayah/regencies?province_id=32"
+curl "https://api.ibnuhabib.web.id/api/v1/wilayah/regencies?province_id=32"
 
 # Kecamatan di Kabupaten Bandung (id 3204)
-curl "https://datasets.snbtku.com/api/v1/wilayah/districts?regency_id=3204"
+curl "https://api.ibnuhabib.web.id/api/v1/wilayah/districts?regency_id=3204"
 
 # Desa/kelurahan dalam satu kecamatan
-curl "https://datasets.snbtku.com/api/v1/wilayah/villages?district_id=320409"
+curl "https://api.ibnuhabib.web.id/api/v1/wilayah/villages?district_id=320409"
 ```
 
 Contoh respons nyata (`/api/v1/wilayah/regencies?province_id=32`, dipotong):

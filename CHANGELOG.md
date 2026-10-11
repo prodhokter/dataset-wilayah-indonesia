@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-11 (revisi), Hostname publik dan internal dipisah
+
+- README memakai `https://api.ibnuhabib.web.id` sebagai base URL publik.
+- `https://datasets.snbtku.com` adalah hostname internal untuk aplikasi SNBTKU (layanan sama), tidak dipromosikan untuk umum.
+
 ## 2026-10-11, Pindah ke Kepmendagri 2025 (38 provinsi)
 
 - Sumber baru: `wilayah-kemendagri-2025.sql` dari [cahyadsn/wilayah](https://github.com/cahyadsn/wilayah) (Kepmendagri No. 300.2.2-2138/2025, MIT).
